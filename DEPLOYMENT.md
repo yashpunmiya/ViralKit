@@ -41,3 +41,14 @@ Alice registered `ALICE`; Bob purchased both campaigns. The confirmed purchase t
 ## Envio
 
 The [indexer project](indexer/README.md) uses the deployed hub address and start block in its ignored local `.env`. Code generation and TypeScript checking pass; local Envio is running with Docker/Postgres/Hasura. A GraphQL query returned both purchase rows and their actual payout amounts. Its endpoint is `http://localhost:8080/v1/graphql` and is not publicly hosted. Configure `NEXT_PUBLIC_ENVIO_GRAPHQL_URL` with a hosted Envio endpoint before presenting a public demo.
+
+## Host the web app on Vercel
+
+The web app is a Yarn workspace inside this repository. When importing `yashpunmiya/ViralKit` into Vercel:
+
+1. Set **Root Directory** to `packages/nextjs` and enable **Include source files outside the Root Directory** so the build can read the root Yarn workspace files.
+2. Keep the Next.js framework defaults. Install uses `yarn install --immutable`; build uses the `build` script in `packages/nextjs/package.json`.
+3. Add the public app settings from `packages/nextjs/.env.example` to Vercel's Production environment. Use the real Dynamic environment ID, deployed ReferralHub and AUSD addresses, and campaign IDs. Set `NEXT_PUBLIC_ENVIO_GRAPHQL_URL` to the **hosted Envio GraphQL endpoint**; the local `http://localhost:8080/v1/graphql` endpoint is not reachable by Vercel visitors.
+4. Add the Vercel production domain to the allowed origins in the Dynamic dashboard, then redeploy so the environment settings take effect.
+
+Never add a wallet private key, recovery phrase, or Envio API token to Vercel's `NEXT_PUBLIC_` variables. The web app only needs the public GraphQL endpoint; deploy the indexer separately to Envio Cloud to keep it available when your computer is off. The Envio Cloud deployment must use an exact Envio dependency version and its own hosted environment variables.
