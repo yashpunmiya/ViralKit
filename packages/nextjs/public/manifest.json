@@ -1,1 +1,10 @@
-{ "name": "Scaffold-ETH 2 DApp", "description": "A DApp built with Scaffold-ETH", "iconPath": "logo.svg" }
+{
+  "name": "ViralKit",
+  "short_name": "ViralKit",
+  "description": "Referral infrastructure for apps on Monad.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f7f8f5",
+  "theme_color": "#f7f8f5",
+  "icons": [{ "src": "/logo.svg", "sizes": "any", "type": "image/svg+xml" }]
+}

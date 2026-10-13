@@ -1,0 +1,15 @@
+---
+description: ViralKit product and integration guidelines
+globs:
+alwaysApply: true
+---
+
+ViralKit is referral infrastructure for apps on Monad. Its current deployment is Monad Testnet (chain ID 10143).
+
+- Preserve the deployed ReferralHub address and all verified contract behavior. Do not redeploy or change contract logic without explicit approval.
+- Keep wallet, checkout, AUSD payment splitting, referral attribution, SDK, and Envio indexing flows intact.
+- Read balances, campaign terms, earnings, and purchase activity from Monad Testnet contracts or the configured Envio GraphQL endpoint. Never add fabricated data or success states.
+- Label testnet transactions and assets clearly; they have no real-world value.
+- Keep credentials in ignored environment files. Never commit private keys, seed phrases, or tokens.
+- Keep sample product flows under `/examples`; maintain the shared product navigation and responsive ViralKit visual system.
+- Run relevant type checks and tests after code changes, and report checks that could not be completed.

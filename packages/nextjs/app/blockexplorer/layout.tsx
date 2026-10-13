@@ -1,9 +1,7 @@
-import { getMetadata } from "~~/utils/scaffold-eth/getMetadata";
-
-export const metadata = getMetadata({
-  title: "Block Explorer",
-  description: "Block Explorer created with 🏗 Scaffold-ETH 2",
-});
+export const metadata = {
+  title: "Monad Testnet Explorer | ViralKit",
+  description: "Inspect Monad Testnet transactions and contract activity.",
+};
 
 const BlockExplorerLayout = ({ children }: { children: React.ReactNode }) => {
   return <>{children}</>;

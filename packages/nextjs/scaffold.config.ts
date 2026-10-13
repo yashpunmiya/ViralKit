@@ -33,7 +33,6 @@ const scaffoldConfig = {
   rpcOverrides: {
     ...rpcOverrides,
     // Example:
-    // [chains.mainnet.id]: "https://mainnet.buidlguidl.com",
   },
 
   // This is ours WalletConnect's default project ID.

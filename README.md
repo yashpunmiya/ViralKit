@@ -1,84 +1,97 @@
 # ViralKit
 
-**One referral identity. Every Monad app. Instant rewards.**
+**Referral infrastructure for apps on Monad.**
 
-ViralKit is reusable referral and payment-splitting infrastructure for Monad applications. A wallet registers one code, merchants create separate campaigns, and a confirmed purchase pays the merchant and referrer atomically. It is infrastructure with two small sample apps, not a marketplace.
+ViralKit gives apps a shared referral identity and onchain campaign checkout. A confirmed purchase can split an ERC-20 payment between a merchant and its referrer in one transaction. Merchants manage campaigns, referrers share campaign links, and developers can integrate the checkout with the ViralKit client SDK.
 
-## Project status
+> **Network status:** The current deployment targets Monad Testnet (chain ID `10143`). MON and AUSD on this network are test assets and have no real-world value. The smart contract has not received an independent security audit.
 
-The Next.js app builds, the contract suite passes, and the full two-campaign purchase flow has been executed on Monad Testnet. Each purchase sent 8 AUSD to the merchant and 2 AUSD to Alice; Envio indexed both purchase events. Dynamic is configured with the user's environment ID, but browser sign-in and Dynamic-signed transactions have not yet been verified. The Envio service is local only. See [IMPLEMENTATION_STATUS.md](IMPLEMENTATION_STATUS.md) for evidence and remaining submission work.
+## Product areas
 
-## What is included
+- `/` — product overview and onboarding
+- `/onboarding` — connect a wallet and choose a workflow
+- `/creator` — create campaigns and review campaign activity
+- `/creator/campaign/[campaignId]` — campaign details and indexed purchases
+- `/dashboard` — referral code, links, onchain earnings, and Envio activity
+- `/developer` and `/docs` — campaign setup and integration guidance
+- `/examples` — working newsletter and event checkout examples
+- `/settings` — connected account settings
 
-- `packages/hardhat/contracts/ReferralHub.sol`: permanent referral-code registry, merchant campaigns, and atomic ERC-20 payouts.
-- `packages/nextjs/lib/viralkit/`: isolated viem SDK used by both demo routes.
-- `/demo/newsletter` and `/demo/event`: separate campaign checkouts with approval, receipt confirmation, and contract-verified access unlock.
-- `/dashboard`: onchain referral identity and earnings plus separately labelled Envio activity.
-- `/developer` and `/docs`: merchant campaign form and integration guide.
-- `indexer/`: Envio HyperIndex config, entities, and event handlers.
+Campaigns, balances, payments, and referral earnings are read from Monad Testnet. Purchase history is read from the configured Envio HyperIndex GraphQL endpoint; it may appear after the chain confirms the transaction and the indexer processes its event.
 
-## Local development
+## Requirements
 
-Requirements: Node 20.18.3+, Yarn 3.2.3. Then:
+- Node.js `20.18.3` or newer
+- Yarn `3.2.3`
+- Docker, if you want to run the Envio indexer locally
+
+## Run locally
+
+Install dependencies and create the frontend environment file:
 
 ```sh
 yarn install
-yarn hardhat:compile
-yarn test
-yarn next:check-types
+cp packages/nextjs/.env.example packages/nextjs/.env.local
+```
+
+Set `NEXT_PUBLIC_DYNAMIC_ENVIRONMENT_ID` and the deployed contract, token, and campaign values in `packages/nextjs/.env.local`. For local Envio indexing, configure `indexer/.env` from `indexer/.env.example`, start the Envio service with Docker using the [indexer guide](indexer/README.md), and set `NEXT_PUBLIC_ENVIO_GRAPHQL_URL` to its GraphQL endpoint. Do not commit `.env` files or wallet secrets.
+
+Start the app in development mode:
+
+```sh
+yarn dev
+```
+
+Open [http://localhost:3000](http://localhost:3000). Build and serve the production app with:
+
+```sh
 yarn next:build
 yarn start
 ```
 
-For Dynamic, copy `packages/nextjs/.env.example` to `packages/nextjs/.env.local` and enter the environment ID from your Dynamic dashboard. For local contract interaction, deploy to Hardhat using `yarn chain` and `yarn deploy`; demo checkouts still need an ERC-20 contract and campaign IDs on that local chain.
+## Project commands
 
-## Monad Testnet configuration
+```sh
+yarn hardhat:compile       # Compile contracts
+yarn hardhat:test          # Run contract tests on the local Hardhat network
+yarn hardhat:check-types   # Check contract tooling TypeScript
+yarn next:check-types      # Check frontend TypeScript
+yarn next:build            # Build the production frontend
+```
 
-The app targets chain ID `10143`, RPC `https://testnet-rpc.monad.xyz/`, and explorer `https://testnet.monadexplorer.com`. Agora documents testnet AUSD at `0xa9012a055bd4e0eDfF8Ce09f960291C09D5322dC`; the app reads its symbol and decimals from the token contract instead of assuming decimals. See [DEPLOYMENT.md](DEPLOYMENT.md) for the gated deployment sequence and [Agora's test token guide](https://docs.agora.finance/instant-settlement/guides/getting-testnet-tokens).
+## Configuration
 
-Never place an unencrypted private key or recovery phrase in chat, source control, or a `NEXT_PUBLIC_` variable. The scaffold's encrypted local Hardhat wallet flow keeps deployment signing local.
+The frontend template is [packages/nextjs/.env.example](packages/nextjs/.env.example). The indexer template is [indexer/.env.example](indexer/.env.example). The deployed Monad Testnet contract and AUSD addresses are recorded in the frontend example and [deployment runbook](DEPLOYMENT.md).
 
-### Verified testnet demo
+Dynamic uses a public environment identifier in the browser. Never put a private key, seed phrase, or other signing secret in a `NEXT_PUBLIC_` variable or in source control. Wallet actions are signed by the connected wallet.
 
-- Chain: Monad Testnet (`10143`)
-- ReferralHub: [`0xf8B23407977e7d741dD4cc8ed8De871117eA307a`](https://testnet.monadexplorer.com/address/0xf8B23407977e7d741dD4cc8ed8De871117eA307a)
-- AUSD: `0xa9012a055bd4e0eDfF8Ce09f960291C09D5322dC` (6 decimals)
-- Campaign 1: newsletter access; campaign 2: event pass. Each costs 10 AUSD with a 20% commission.
-- Alice registered `ALICE`; Bob purchased once in each campaign. His paid access is confirmed onchain for both.
-- Newsletter purchase: [transaction](https://testnet.monadexplorer.com/tx/0x70f34f5c1c69f72f3b59e29204929e8e3ef3158e2fcc8656763a7212b3e20bbc)
-- Event purchase: [transaction](https://testnet.monadexplorer.com/tx/0x6f3830ffed331204a233c75fd2e9d356cec8c410e7e3bec8279ced64abbc157e)
-- Each 10 AUSD purchase paid 8 AUSD to the merchant and 2 AUSD to Alice. Alice's lifetime referral earnings are 4 AUSD.
-- Both purchase rows are present in the local Envio GraphQL API at `http://localhost:8080/v1/graphql`. This endpoint is not public.
+## Architecture
 
-## SDK example
+- `packages/hardhat/contracts/ReferralHub.sol` — referral registration, campaign terms, and atomic ERC-20 settlement
+- `packages/nextjs/lib/viralkit/` — viem client and integration helpers
+- `packages/nextjs/app/` — product, account, checkout, and example routes
+- `indexer/` — Envio HyperIndex event handlers, schema, and GraphQL configuration
+
+The deployed contract is immutable and does not require a redeployment to run the existing app. Treat contract changes and any deployment as a separate reviewed release. Keep the existing deployed addresses when configuring an environment.
+
+## SDK
+
+The SDK is currently included as a source module in this repository; it is not published as an npm package. Example:
 
 ```ts
-// Local source module; ViralKit does not publish an npm package yet.
 import { createViralKitClient } from "~~/lib/viralkit";
 
 const viralKit = createViralKitClient({ publicClient, walletClient });
 const referrer = await viralKit.resolveReferralCode("ALICE");
 const campaign = await viralKit.getCampaign(campaignId);
-const purchaseHash = await viralKit.purchaseWithReferral(campaignId, "ALICE");
-const receipt = await publicClient.waitForTransactionReceipt({ hash: purchaseHash });
+const hash = await viralKit.purchaseWithReferral(campaignId, "ALICE");
+const receipt = await publicClient.waitForTransactionReceipt({ hash });
 if (receipt.status !== "success") throw new Error("Purchase failed");
-const hasAccess = await viralKit.hasPurchased(campaignId, buyerAddress);
+const accessGranted = await viralKit.hasPurchased(campaignId, buyerAddress);
 ```
 
-`purchaseWithReferral` checks the campaign, token balance, and allowance, requests an exact approval when needed, and then submits the purchase. Apps must wait for a successful receipt and verify `hasPurchased` before unlocking access. Campaign IDs and contract addresses are environment configuration, not embedded in the SDK.
+Wait for a successful receipt and verify access onchain before granting a product entitlement. See `/docs` for the integration flow and `/examples` for working checkout implementations.
 
-## Payout behavior and limitations
+## Licenses
 
-For a campaign with a 10 AUSD price and 2,000 basis point commission, a referred buyer pays 10 AUSD, the merchant receives 8 AUSD, and the registered referrer receives 2 AUSD in the same transaction. A purchase without a referral pays the full price to the merchant. Each campaign represents one-time access: a buyer cannot purchase the same campaign twice.
-
-The contract supports ordinary ERC-20 tokens with exact transfer behavior. It rejects fee-on-transfer behavior, uses OpenZeppelin `SafeERC20` and `ReentrancyGuard`, keeps no purchase funds under ordinary tokens, has no admin or upgrade key, and has a 25% commission cap. It is an unaudited hackathon MVP, not an audited production protocol.
-
-## Architecture and attribution
-
-The repository was created from [Monad Developers' scaffold-monad-hardhat](https://github.com/monad-developers/scaffold-monad-hardhat), which builds on Scaffold-ETH 2. Existing MIT notices remain in the repository. The independent `ReferralHub` uses OpenZeppelin contracts already present in the starter.
-
-[Base's Flywheel](https://github.com/base/flywheel) is MIT licensed and documents reusable referral identities and ERC-20 rewards. Its modular campaign-hook and treasury architecture is broader than this demo needs. ViralKit therefore implements a small independent contract rather than copying Flywheel source. The contract is new hackathon work; the frontend, build tooling, and dependencies retain their respective upstream licenses and notices.
-
-## Submission material
-
-See [DEMO_SCRIPT.md](DEMO_SCRIPT.md) for the walkthrough and transaction evidence and [HACKATHON_SUBMISSION.md](HACKATHON_SUBMISSION.md) for a draft that labels missing public submission assets.
+See [LICENCE](LICENCE) and the third-party notices retained with bundled dependencies.

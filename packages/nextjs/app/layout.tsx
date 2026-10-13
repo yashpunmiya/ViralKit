@@ -14,6 +14,8 @@ const plexMono = IBM_Plex_Mono({
 export const metadata = {
   title: "ViralKit — Referral infrastructure for Monad",
   description: "Launch referral campaigns, integrate onchain rewards, and track confirmed earnings across apps.",
+  applicationName: "ViralKit",
+  icons: { icon: "/logo.svg", shortcut: "/logo.svg" },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
