@@ -1,0 +1,17 @@
+# Envio HyperIndex v3. Contract address and start block are populated at run time.
+name: viralkit-referrals
+description: Referral registrations, campaigns, and canonical ReferralHub purchases on Monad Testnet
+address_format: lowercase
+contracts:
+  - name: ReferralHub
+    events:
+      - event: "ReferralRegistered(address indexed referrer, bytes32 indexed codeHash, string code)"
+      - event: "CampaignCreated(uint256 indexed campaignId, address indexed merchant, address indexed token, uint256 price, uint16 commissionBps, string metadata)"
+      - event: "CampaignUpdated(uint256 indexed campaignId, address indexed merchant, address indexed token, uint256 price, uint16 commissionBps, bool active, string metadata)"
+      - event: "PurchaseCompleted(uint256 indexed campaignId, address indexed buyer, address indexed referrer, address token, uint256 price, uint256 merchantAmount, uint256 referralAmount, bytes32 referralCodeHash)"
+chains:
+  - id: 10143
+    start_block: ${REFERRAL_HUB_START_BLOCK:-0}
+    contracts:
+      - name: ReferralHub
+        address: "${REFERRAL_HUB_ADDRESS}"

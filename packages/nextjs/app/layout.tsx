@@ -1,21 +1,29 @@
-import "@rainbow-me/rainbowkit/styles.css";
+import { IBM_Plex_Mono, Manrope } from "next/font/google";
 import { ScaffoldEthAppWithProviders } from "~~/components/ScaffoldEthAppWithProviders";
 import { ThemeProvider } from "~~/components/ThemeProvider";
 import "~~/styles/globals.css";
-import { getMetadata } from "~~/utils/scaffold-eth/getMetadata";
 
-export const metadata = getMetadata({ title: "Scaffold-ETH 2 App", description: "Built with 🏗 Scaffold-ETH 2" });
+const manrope = Manrope({ subsets: ["latin"], variable: "--font-manrope", display: "swap" });
+const plexMono = IBM_Plex_Mono({
+  subsets: ["latin"],
+  weight: ["400", "500", "600"],
+  variable: "--font-plex-mono",
+  display: "swap",
+});
 
-const ScaffoldEthApp = ({ children }: { children: React.ReactNode }) => {
+export const metadata = {
+  title: "ViralKit — Referral infrastructure for Monad",
+  description: "Launch referral campaigns, integrate onchain rewards, and track confirmed earnings across apps.",
+};
+
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html suppressHydrationWarning>
-      <body>
-        <ThemeProvider enableSystem>
+    <html lang="en" data-theme="light" suppressHydrationWarning>
+      <body className={`${manrope.variable} ${plexMono.variable}`}>
+        <ThemeProvider enableSystem={false} attribute="data-theme" defaultTheme="light">
           <ScaffoldEthAppWithProviders>{children}</ScaffoldEthAppWithProviders>
         </ThemeProvider>
       </body>
     </html>
   );
-};
-
-export default ScaffoldEthApp;
+}

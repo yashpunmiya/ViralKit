@@ -1,6 +1,12 @@
 # dependencies
 node_modules
 
+# local credentials and deployment settings
+.env
+.env.*
+!.env.example
+!.env.*.example
+
 # yarn
 .yarn/*
 !.yarn/patches
@@ -11,6 +17,9 @@ node_modules
 
 # eslint
 .eslintcache
+
+# Isolated Next.js production build used while dev server is active
+/packages/nextjs/.next-viral/
 
 # misc
 .DS_Store

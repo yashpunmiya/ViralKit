@@ -1,114 +1,84 @@
-# 🏗 Scaffold-ETH 2 with Hardhat + Monad Testnet Configuration 
+# ViralKit
 
-<h4 align="center">
-  <a href="https://docs.scaffoldeth.io">Documentation</a> |
-  <a href="https://scaffoldeth.io">Website</a>
-</h4>
+**One referral identity. Every Monad app. Instant rewards.**
 
-🧪 An open-source, up-to-date toolkit for building decentralized applications (dapps) on the Ethereum blockchain. It's designed to make it easier for developers to create and deploy smart contracts and build user interfaces that interact with those contracts.
+ViralKit is reusable referral and payment-splitting infrastructure for Monad applications. A wallet registers one code, merchants create separate campaigns, and a confirmed purchase pays the merchant and referrer atomically. It is infrastructure with two small sample apps, not a marketplace.
 
-⚙️ Built using NextJS, RainbowKit, Hardhat, Wagmi, Viem, and Typescript.
+## Project status
 
-- ✅ **Contract Hot Reload**: Your frontend auto-adapts to your smart contract as you edit it.
-- 🪝 **[Custom hooks](https://docs.scaffoldeth.io/hooks/)**: Collection of React hooks wrapper around [wagmi](https://wagmi.sh/) to simplify interactions with smart contracts with typescript autocompletion.
-- 🧱 [**Components**](https://docs.scaffoldeth.io/components/): Collection of common web3 components to quickly build your frontend.
-- 🔥 **Burner Wallet & Local Faucet**: Quickly test your application with a burner wallet and local faucet.
-- 🔐 **Integration with Wallet Providers**: Connect to different wallet providers and interact with the Ethereum network.
+The Next.js app builds, the contract suite passes, and the full two-campaign purchase flow has been executed on Monad Testnet. Each purchase sent 8 AUSD to the merchant and 2 AUSD to Alice; Envio indexed both purchase events. Dynamic is configured with the user's environment ID, but browser sign-in and Dynamic-signed transactions have not yet been verified. The Envio service is local only. See [IMPLEMENTATION_STATUS.md](IMPLEMENTATION_STATUS.md) for evidence and remaining submission work.
 
-![Debug Contracts tab](https://github.com/scaffold-eth/scaffold-eth-2/assets/55535804/b237af0c-5027-4849-a5c1-2e31495cccb1)
+## What is included
 
-## Requirements
+- `packages/hardhat/contracts/ReferralHub.sol`: permanent referral-code registry, merchant campaigns, and atomic ERC-20 payouts.
+- `packages/nextjs/lib/viralkit/`: isolated viem SDK used by both demo routes.
+- `/demo/newsletter` and `/demo/event`: separate campaign checkouts with approval, receipt confirmation, and contract-verified access unlock.
+- `/dashboard`: onchain referral identity and earnings plus separately labelled Envio activity.
+- `/developer` and `/docs`: merchant campaign form and integration guide.
+- `indexer/`: Envio HyperIndex config, entities, and event handlers.
 
-Before you begin, you need to install the following tools:
+## Local development
 
-- [Node (>= v20.18.3)](https://nodejs.org/en/download/)
-- Yarn ([v1](https://classic.yarnpkg.com/en/docs/install/) or [v2+](https://yarnpkg.com/getting-started/install))
-- [Git](https://git-scm.com/downloads)
+Requirements: Node 20.18.3+, Yarn 3.2.3. Then:
 
-## Quickstart
-
-To get started with Scaffold-ETH 2, follow the steps below:
-
-1. Install dependencies if it was skipped in CLI:
-
-```
-cd my-dapp-example
+```sh
 yarn install
-```
-
-2. Run a local network in the first terminal:
-
-```
-yarn chain
-```
-
-This command starts a local Ethereum network using Hardhat. The network runs on your local machine and can be used for testing and development. You can customize the network configuration in `packages/hardhat/hardhat.config.ts`.
-
-3. On a second terminal, deploy the test contract:
-
-```
-yarn deploy
-```
-
-This command deploys a test smart contract to the local network. The contract is located in `packages/hardhat/contracts` and can be modified to suit your needs. The `yarn deploy` command uses the deploy script located in `packages/hardhat/deploy` to deploy the contract to the network. You can also customize the deploy script.
-
-4. On a third terminal, start your NextJS app:
-
-```
+yarn hardhat:compile
+yarn test
+yarn next:check-types
+yarn next:build
 yarn start
 ```
 
-Visit your app on: `http://localhost:3000`. You can interact with your smart contract using the `Debug Contracts` page. You can tweak the app config in `packages/nextjs/scaffold.config.ts`.
+For Dynamic, copy `packages/nextjs/.env.example` to `packages/nextjs/.env.local` and enter the environment ID from your Dynamic dashboard. For local contract interaction, deploy to Hardhat using `yarn chain` and `yarn deploy`; demo checkouts still need an ERC-20 contract and campaign IDs on that local chain.
 
-Run smart contract test with `yarn hardhat:test`
+## Monad Testnet configuration
 
-- Edit your smart contracts in `packages/hardhat/contracts`
-- Edit your frontend homepage at `packages/nextjs/app/page.tsx`. For guidance on [routing](https://nextjs.org/docs/app/building-your-application/routing/defining-routes) and configuring [pages/layouts](https://nextjs.org/docs/app/building-your-application/routing/pages-and-layouts) checkout the Next.js documentation.
-- Edit your deployment scripts in `packages/hardhat/deploy`
+The app targets chain ID `10143`, RPC `https://testnet-rpc.monad.xyz/`, and explorer `https://testnet.monadexplorer.com`. Agora documents testnet AUSD at `0xa9012a055bd4e0eDfF8Ce09f960291C09D5322dC`; the app reads its symbol and decimals from the token contract instead of assuming decimals. See [DEPLOYMENT.md](DEPLOYMENT.md) for the gated deployment sequence and [Agora's test token guide](https://docs.agora.finance/instant-settlement/guides/getting-testnet-tokens).
 
+Never place an unencrypted private key or recovery phrase in chat, source control, or a `NEXT_PUBLIC_` variable. The scaffold's encrypted local Hardhat wallet flow keeps deployment signing local.
 
-## Contract Verification
+### Verified testnet demo
 
-After deploying your smart contract to a testnet or mainnet, you can verify it on block explorers like Etherscan or Sourcify. This makes your contract source code publicly available and allows users to interact with it through the block explorer.
+- Chain: Monad Testnet (`10143`)
+- ReferralHub: [`0xf8B23407977e7d741dD4cc8ed8De871117eA307a`](https://testnet.monadexplorer.com/address/0xf8B23407977e7d741dD4cc8ed8De871117eA307a)
+- AUSD: `0xa9012a055bd4e0eDfF8Ce09f960291C09D5322dC` (6 decimals)
+- Campaign 1: newsletter access; campaign 2: event pass. Each costs 10 AUSD with a 20% commission.
+- Alice registered `ALICE`; Bob purchased once in each campaign. His paid access is confirmed onchain for both.
+- Newsletter purchase: [transaction](https://testnet.monadexplorer.com/tx/0x70f34f5c1c69f72f3b59e29204929e8e3ef3158e2fcc8656763a7212b3e20bbc)
+- Event purchase: [transaction](https://testnet.monadexplorer.com/tx/0x6f3830ffed331204a233c75fd2e9d356cec8c410e7e3bec8279ced64abbc157e)
+- Each 10 AUSD purchase paid 8 AUSD to the merchant and 2 AUSD to Alice. Alice's lifetime referral earnings are 4 AUSD.
+- Both purchase rows are present in the local Envio GraphQL API at `http://localhost:8080/v1/graphql`. This endpoint is not public.
 
-### Sourcify Verification (Recommended)
+## SDK example
 
-Scaffold-ETH 2 is configured to use Sourcify for contract verification by default. Sourcify is a decentralized verification platform that supports multiple block explorers.
+```ts
+// Local source module; ViralKit does not publish an npm package yet.
+import { createViralKitClient } from "~~/lib/viralkit";
 
-#### For Monad Testnet
-
-1. Deploy your contract to Monad testnet:
-```bash
-yarn deploy --network monadTestnet
+const viralKit = createViralKitClient({ publicClient, walletClient });
+const referrer = await viralKit.resolveReferralCode("ALICE");
+const campaign = await viralKit.getCampaign(campaignId);
+const purchaseHash = await viralKit.purchaseWithReferral(campaignId, "ALICE");
+const receipt = await publicClient.waitForTransactionReceipt({ hash: purchaseHash });
+if (receipt.status !== "success") throw new Error("Purchase failed");
+const hasAccess = await viralKit.hasPurchased(campaignId, buyerAddress);
 ```
 
-2. Verify your contract using the hardhat-deploy plugin:
-```bash
-yarn hardhat-verify --network monadTestnet <CONTRACT_ADDRESS>
-```
+`purchaseWithReferral` checks the campaign, token balance, and allowance, requests an exact approval when needed, and then submits the purchase. Apps must wait for a successful receipt and verify `hasPurchased` before unlocking access. Campaign IDs and contract addresses are environment configuration, not embedded in the SDK.
 
-Replace `<CONTRACT_ADDRESS>` with the address of your deployed contract.
+## Payout behavior and limitations
 
-#### Configuration
+For a campaign with a 10 AUSD price and 2,000 basis point commission, a referred buyer pays 10 AUSD, the merchant receives 8 AUSD, and the registered referrer receives 2 AUSD in the same transaction. A purchase without a referral pays the full price to the merchant. Each campaign represents one-time access: a buyer cannot purchase the same campaign twice.
 
-The Sourcify configuration is already set up in `packages/hardhat/hardhat.config.ts`:
+The contract supports ordinary ERC-20 tokens with exact transfer behavior. It rejects fee-on-transfer behavior, uses OpenZeppelin `SafeERC20` and `ReentrancyGuard`, keeps no purchase funds under ordinary tokens, has no admin or upgrade key, and has a 25% commission cap. It is an unaudited hackathon MVP, not an audited production protocol.
 
-```typescript
-sourcify: {
-  enabled: true,
-  apiUrl: "https://sourcify-api-monad.blockvision.org",
-  browserUrl: "https://testnet.monadexplorer.com",
-},
-```
+## Architecture and attribution
 
-## Documentation
+The repository was created from [Monad Developers' scaffold-monad-hardhat](https://github.com/monad-developers/scaffold-monad-hardhat), which builds on Scaffold-ETH 2. Existing MIT notices remain in the repository. The independent `ReferralHub` uses OpenZeppelin contracts already present in the starter.
 
-Visit our [docs](https://docs.scaffoldeth.io) to learn how to start building with Scaffold-ETH 2.
+[Base's Flywheel](https://github.com/base/flywheel) is MIT licensed and documents reusable referral identities and ERC-20 rewards. Its modular campaign-hook and treasury architecture is broader than this demo needs. ViralKit therefore implements a small independent contract rather than copying Flywheel source. The contract is new hackathon work; the frontend, build tooling, and dependencies retain their respective upstream licenses and notices.
 
-To know more about its features, check out our [website](https://scaffoldeth.io).
+## Submission material
 
-## Contributing to Scaffold-ETH 2
-
-We welcome contributions to Scaffold-ETH 2!
-
-Please see [CONTRIBUTING.MD](https://github.com/scaffold-eth/scaffold-eth-2/blob/main/CONTRIBUTING.md) for more information and guidelines for contributing to Scaffold-ETH 2.
+See [DEMO_SCRIPT.md](DEMO_SCRIPT.md) for the walkthrough and transaction evidence and [HACKATHON_SUBMISSION.md](HACKATHON_SUBMISSION.md) for a draft that labels missing public submission assets.

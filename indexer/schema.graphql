@@ -1,0 +1,37 @@
+type Referral @entity {
+  id: ID!
+  code: String!
+  codeHash: String!
+  registeredAtBlock: BigInt!
+  registrationTransactionHash: String!
+  totalEarnings: BigInt!
+  referredPurchases: Int!
+}
+
+type Campaign @entity {
+  id: ID!
+  merchant: String!
+  token: String!
+  price: BigInt!
+  commissionBps: Int!
+  active: Boolean!
+  metadata: String!
+  createdAtBlock: BigInt!
+  purchaseCount: Int!
+  merchantRevenue: BigInt!
+}
+
+type Purchase @entity {
+  id: ID!
+  campaignId: String!
+  buyer: String!
+  referrer: String!
+  token: String!
+  price: BigInt!
+  merchantAmount: BigInt!
+  referralAmount: BigInt!
+  transactionHash: String!
+  blockNumber: BigInt!
+  blockTimestamp: Int!
+  logIndex: Int!
+}
