@@ -1,6 +1,21 @@
 import { type Abi, parseAbi } from "viem";
 
 export const REFERRAL_HUB_ABI = parseAbi([
+  "error InvalidReferralCode()",
+  "error ReferralCodeAlreadyRegistered()",
+  "error WalletAlreadyHasReferralCode()",
+  "error InvalidCampaignConfiguration()",
+  "error CampaignNotFound()",
+  "error CampaignInactive()",
+  "error NotCampaignMerchant()",
+  "error AlreadyPurchased()",
+  "error InvalidReferral()",
+  "error UnsupportedTokenBehavior()",
+  "error ReentrancyGuardReentrantCall()",
+  "error SafeERC20FailedOperation(address token)",
+  "error AddressEmptyCode(address target)",
+  "error AddressInsufficientBalance(address account)",
+  "error FailedInnerCall()",
   "function nextCampaignId() view returns (uint256)",
   "function referrerByCode(bytes32 codeHash) view returns (address)",
   "function codeHashByReferrer(address referrer) view returns (bytes32)",
