@@ -11,7 +11,7 @@ contracts:
       - event: "PurchaseCompleted(uint256 indexed campaignId, address indexed buyer, address indexed referrer, address token, uint256 price, uint256 merchantAmount, uint256 referralAmount, bytes32 referralCodeHash)"
 chains:
   - id: 10143
-    start_block: ${REFERRAL_HUB_START_BLOCK:-0}
+    start_block: ${ENVIO_REFERRAL_HUB_START_BLOCK:-0}
     contracts:
       - name: ReferralHub
-        address: "${REFERRAL_HUB_ADDRESS}"
+        address: "${ENVIO_REFERRAL_HUB_ADDRESS}"

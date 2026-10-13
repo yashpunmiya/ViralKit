@@ -276,7 +276,7 @@ envio-linux-x64@3.14.0:
   resolved "https://registry.yarnpkg.com/envio-linux-x64/-/envio-linux-x64-3.14.0.tgz#5e0a70c677b73c8f7b1b56ceba4b039c9e479a55"
   integrity sha512-l0F0sNPtw4y1HGn3VXpZZlojqk0yCUDUET4mthLbcM0KH6zKWUlve1bTRcBicQYVrqa/jH09Taw7kcg+401FOw==
 
-envio@^3.13.0:
+envio@3.14.0:
   version "3.14.0"
   resolved "https://registry.yarnpkg.com/envio/-/envio-3.14.0.tgz#54266ac8bd15109855c608f69f45dcfecb0b0bb9"
   integrity sha512-p76wRZYM56Fe5h+Uwy438U9eOYde1Dz8KxTwpXWtILN9DoCqLRPdwPJG3ulE4hPPmgNNAFixaIN83Mf9WTV5Mw==
