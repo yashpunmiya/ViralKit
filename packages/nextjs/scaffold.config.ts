@@ -10,6 +10,9 @@ export type ScaffoldConfig = {
 };
 
 export const DEFAULT_ALCHEMY_API_KEY = "oKxs-03sij-U_N0iOlrSsZFr29-IqbuF";
+const monadRpcUrl = process.env.NEXT_PUBLIC_MONAD_RPC_URL;
+const rpcOverrides: Record<number, string> = {};
+if (monadRpcUrl) rpcOverrides[chains.monadTestnet.id] = monadRpcUrl;
 
 const scaffoldConfig = {
   // The networks on which your DApp is live
@@ -28,6 +31,7 @@ const scaffoldConfig = {
   // If you want to use a different RPC for a specific network, you can add it here.
   // The key is the chain ID, and the value is the HTTP RPC URL
   rpcOverrides: {
+    ...rpcOverrides,
     // Example:
     // [chains.mainnet.id]: "https://mainnet.buidlguidl.com",
   },

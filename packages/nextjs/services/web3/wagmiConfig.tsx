@@ -1,5 +1,5 @@
 import { Chain, createClient, fallback, http } from "viem";
-import { hardhat, mainnet } from "viem/chains";
+import { hardhat, mainnet, monadTestnet } from "viem/chains";
 import { createConfig } from "wagmi";
 import scaffoldConfig, { DEFAULT_ALCHEMY_API_KEY, ScaffoldConfig } from "~~/scaffold.config";
 import { getAlchemyHttpUrl } from "~~/utils/scaffold-eth";
@@ -33,6 +33,9 @@ export const wagmiConfig = createConfig({
     return createClient({
       chain,
       transport: fallback(rpcFallbacks),
+      // Coalesce concurrent contract reads through Monad's Multicall3 contract
+      // so dashboard pages do not exceed the public RPC's request-rate limit.
+      ...(chain.id === monadTestnet.id ? { batch: { multicall: { wait: 20 } } } : {}),
       ...(chain.id !== (hardhat as Chain).id
         ? {
             pollingInterval: scaffoldConfig.pollingInterval,
